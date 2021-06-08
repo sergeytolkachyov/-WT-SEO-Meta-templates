@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+<extension type="plugin" version="3.9" method="upgrade" group="system">
+    <name>System - WT SEO Meta templates</name>
+    <author>Sergey Tolkachyov</author>
+    <authorEmail>info@web-tolk.ru</authorEmail>
+    <authorUrl>https://web-tolk.ru/</authorUrl>
+	<creationDate>11/05/2021</creationDate>
+    <copyright>Sergey Tolkachyov</copyright>
+    <license>GNU General Public License v3.0</license>
+    <version>1.1.0</version>
+    <description>PLG_WT_SEO_META_TEMPLATES_DESC</description>
+	<scriptfile>script.php</scriptfile>
+    <files>
+        <filename plugin="wt_seo_meta_templates">wt_seo_meta_templates.php</filename>
+        <folder>language</folder>
+        <folder>img</folder>
+        <folder>fields</folder>
+    </files>
+	<languages folder="language" client="administrator">
+        <language tag="en-GB">en-GB/en-GB.plg_system_wt_seo_meta_templates.ini</language>
+        <language tag="ru-RU">ru-RU/ru-RU.plg_system_wt_seo_meta_templates.ini</language>
+        <language tag="en-GB">en-GB/en-GB.plg_system_wt_seo_meta_templates.sys.ini</language>
+        <language tag="ru-RU">ru-RU/ru-RU.plg_system_wt_seo_meta_templates.sys.ini</language>
+    </languages>
+       <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field addfieldpath="plugins/system/wt_seo_meta_templates/fields" type="plugininfo" name="plugininfo"/>
+            </fieldset>
+        </fields>
+    </config>
+	<updateservers>
+        <server type="extension" name="WebTolkUpdateServer">https://web-tolk.ru/component/swjprojects/jupdate.html?element=wt_seo_meta_templates</server>
+    </updateservers>
+</extension>
