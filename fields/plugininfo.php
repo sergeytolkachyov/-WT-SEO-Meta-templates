@@ -52,7 +52,7 @@ class JFormFieldPlugininfo extends JFormFieldSpacer
 			}
 		");
 
-		$wt_plugin_info = simplexml_load_file(JPATH_SITE."/plugins/system/wt_seo_meta_templates_virtuemart/wt_seo_meta_templates_virtuemart.xml");
+		$wt_plugin_info = simplexml_load_file(JPATH_SITE."/plugins/system/wt_seo_meta_templates/wt_seo_meta_templates.xml");
 
 
 		?>
