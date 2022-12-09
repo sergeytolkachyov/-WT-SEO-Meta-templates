@@ -1,7 +1,7 @@
 <?php
 /**
  * @package     WT SEO Meta templates
- * @version     1.0.0
+ * @version     1.4.2
  * @Author 		Sergey Tolkachyov, https://web-tolk.ru
  * @copyright   Copyright (C) 2021 Sergey Tolkachyov
  * @license     GNU/GPL 3
@@ -43,7 +43,7 @@ class JFormFieldPlugininfo extends JFormFieldSpacer
 	protected function getLabel()
 	{
 		$info="";
-		$doc = Factory::getDocument();
+		$doc = Factory::getApplication()->getDocument();
 		$doc->addStyleDeclaration("
 			.webtolk-plugin-info{
 				box-shadow: 0 .5rem 1rem rgba(0,0,0,.15); 

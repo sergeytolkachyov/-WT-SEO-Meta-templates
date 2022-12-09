@@ -1,9 +1,9 @@
 <?php
 /**
  * @package     WT SEO Meta templates
- * @version     1.0.0
+ * @version     1.4.2
  * @Author 		Sergey Tolkachyov, https://web-tolk.ru
- * @copyright   Copyright (C) 2021 Sergey Tolkachyov
+ * @copyright   Copyright (C) 2022 Sergey Tolkachyov
  * @license     GNU/GPL 3
  * @since 		1.0.0
  */
@@ -17,23 +17,19 @@ use Joomla\CMS\Profiler\Profiler;
 
 class plgSystemWt_seo_meta_templates extends CMSPlugin
 {
-	public function __construct( &$subject, $config )
-	{
-
-		parent::__construct( $subject, $config );
-		$this->loadLanguage();
-	}
+	protected $autoloadLanguage = true;
 
 	public function onBeforeCompileHead(){
 		//Работаем только на фронте
 		$app = Factory::getApplication();
-		if($app->isClient('site')){
+		if(!$app->isClient('site')){
+			return;
+		}
 		!JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: start');
-		$doc = Factory::getDocument();
+		$doc = Factory::getApplication()->getDocument();
 			// получаем переменные от сторонних плагинов
 			!JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: Before additional plugins import');
-			PluginHelper::importPlugin('wt_seo_meta_templates');
-			$results = $app->triggerEvent('onWt_seo_meta_templatesAddVariables',array());
+				$results = $app->triggerEvent('onWt_seo_meta_templatesAddVariables',array());
 			!JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: After additional plugins import');
 
 			$allVariables = array();
@@ -88,7 +84,7 @@ class plgSystemWt_seo_meta_templates extends CMSPlugin
 			!JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: After variables replace');
 			$doc->setHeadData($head);
 			!JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: end');
-		}
+
 	}
 
 

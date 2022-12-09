@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<extension type="plugin" version="3.9" method="upgrade" group="system">
+<extension type="plugin" method="upgrade" group="system">
     <name>System - WT SEO Meta templates</name>
     <author>Sergey Tolkachyov</author>
     <authorEmail>info@web-tolk.ru</authorEmail>
@@ -7,7 +7,7 @@
 	<creationDate>11/05/2021</creationDate>
     <copyright>Sergey Tolkachyov</copyright>
     <license>GNU General Public License v3.0</license>
-    <version>1.1.0</version>
+    <version>1.4.2</version>
     <description>PLG_WT_SEO_META_TEMPLATES_DESC</description>
 	<scriptfile>script.php</scriptfile>
     <files>
