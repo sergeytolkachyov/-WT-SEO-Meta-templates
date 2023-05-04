@@ -4,10 +4,10 @@
     <author>Sergey Tolkachyov</author>
     <authorEmail>info@web-tolk.ru</authorEmail>
     <authorUrl>https://web-tolk.ru/</authorUrl>
-	<creationDate>11/05/2021</creationDate>
+	<creationDate>04/05/2023</creationDate>
     <copyright>Sergey Tolkachyov</copyright>
     <license>GNU General Public License v3.0</license>
-    <version>1.4.2</version>
+    <version>1.4.3</version>
     <description>PLG_WT_SEO_META_TEMPLATES_DESC</description>
 	<scriptfile>script.php</scriptfile>
     <files>
