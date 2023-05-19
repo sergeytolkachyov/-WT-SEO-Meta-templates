@@ -7,67 +7,11 @@ use Joomla\CMS\Installer\Installer;
 use Joomla\CMS\Installer\InstallerHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\CMS\Uri\Uri;
 use Joomla\CMS\Version;
 
-/**
- * Script file of HelloWorld component.
- *
- * The name of this class is dependent on the component being installed.
- * The class name should have the component's name, directly followed by
- * the text InstallerScript (ex:. com_helloWorldInstallerScript).
- *
- * This class will be called by Joomla!'s installer, if specified in your component's
- * manifest file, and is used for custom automation actions in its installation process.
- *
- * In order to use this automation script, you should reference it in your component's
- * manifest file as follows:
- * <scriptfile>script.php</scriptfile>
- *
- * @package     Joomla.Administrator
- * @subpackage  com_helloworld
- *
- * @copyright   Copyright (C) 2005 - 2018 Open Source Matters, Inc. All rights reserved.
- * @license     GNU General Public License version 2 or later; see LICENSE.txt
- */
 class plgSystemWt_seo_meta_templatesInstallerScript
 {
-	/**
-	 * This method is called after a component is installed.
-	 *
-	 * @param   \stdClass  $parent  - Parent object calling this method.
-	 *
-	 * @return void
-	 */
-	public function install($parent)
-	{
-
-	}
-
-	/**
-	 * This method is called after a component is uninstalled.
-	 *
-	 * @param   \stdClass  $parent  - Parent object calling this method.
-	 *
-	 * @return void
-	 */
-	public function uninstall($parent)
-	{
-
-
-	}
-
-	/**
-	 * This method is called after a component is updated.
-	 *
-	 * @param   \stdClass  $parent  - Parent object calling object.
-	 *
-	 * @return void
-	 */
-	public function update($parent)
-	{
-
-	}
-
 	/**
 	 * Runs just before any installation action is performed on the component.
 	 * Verifications and pre-requisites should run in this function.
@@ -76,13 +20,17 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 	 *                              - * install
 	 *                              - * update
 	 *                              - * discover_install
-	 * @param   \stdClass  $parent  - Parent object calling object.
+	 * @param   \stdClass  $installer  - Parent object calling object.
 	 *
 	 * @return void
 	 */
-	public function preflight($type, $parent)
+	public function preflight($type, $installer)
 	{
-
+        if ((new Version())->isCompatible('4.0') === false)
+        {
+            Factory::getApplication()->enqueueMessage('&#128546; <strong>WT SEO Meta templates - tags</strong> plugin doesn\'t support Joomla versions <span class="alert-link">lower 4</span>. Your Joomla version is <span class="badge badge-important">'.(new Version())->getShortVersion().'</span>','error');
+            return false;
+        }
 	}
 
 	/**
@@ -239,18 +187,10 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 			$smile     = $smiles[$smile_key];
 		}
 
-		if ((new Version())->isCompatible('4.0') == true)
-		{
-			$element            = strtoupper($installer->getElement());
-			$class              = 'col-';
-			$web_tolk_site_icon = '';
-		}
-		else
-		{
-			$element            = strtoupper($installer->get("element")); // ex. "$parent"
-			$class              = 'span';
-			$web_tolk_site_icon = "<i class='icon-share-alt'></i>";
-		}
+        $element            = strtoupper($installer->getElement());
+        $class              = 'col-';
+        $web_tolk_site_icon = '';
+
 
 		echo "
 		<style>	.thirdpartyintegration {
@@ -369,7 +309,7 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 		if (file_exists(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml'))
 		{
 			$phocagallery         = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml');
-			$thirdpartyextensions .= "<div class='thirdpartyintegration success'><img class='thirdpartyintegration-logo' src='" . JUri::root(true) . "/media/com_phocagallery/images/administrator/logo-phoca.png'/>
+			$thirdpartyextensions .= "<div class='thirdpartyintegration success'><img class='thirdpartyintegration-logo' src='" . Uri::root(true) . "/media/com_phocagallery/images/administrator/logo-phoca.png'/>
 													<div class='media-body'><strong>" . $phocagallery->author . "'s</strong> <strong>" . $phocagallery->name . " v." . $phocagallery->version . "</strong> detected. <a href='" . $phocagallery->authorUrl . "' target='_blank'>" . $phocagallery->authorUrl . "</a> <a href='mailto:" . $phocagallery->authorEmail . "' target='_blank'>" . $phocagallery->authorEmail . "</a>
 													<p>Use plugin <code>System - WT SEO Meta templates - Phoca Gallery</code>.</p>
 													</div>
