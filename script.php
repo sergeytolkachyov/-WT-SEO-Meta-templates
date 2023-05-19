@@ -246,6 +246,18 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 
 		}
 
+        $com_tags_url = 'https://web-tolk.ru/get.html?element=wt_seo_meta_templates_tags';
+		if (!$this->installDependencies($installer, $com_tags_url))
+		{
+
+			$app->enqueueMessage(
+				Text::sprintf('WT SEO Meta templates - Content not installed or updated',
+					Text::_('Cannot install or update the data-provider plugin for Joomla Tags. PLease, <a href="' . $com_content_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
+				), 'error'
+			);
+
+		}
+
 		/**
 		 * Virtuemart
 		 */
