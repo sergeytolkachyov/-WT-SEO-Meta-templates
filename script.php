@@ -193,26 +193,9 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 
 
 		echo "
-		<style>	.thirdpartyintegration {
-				display:flex;
-				padding: 8px 12px;
-				align-items:center;
-			}
-			.thirdpartyintegration-logo {
-				height:32px;
-				float:left; 
-				margin-right: 5px;
-			}
-			
-			.thirdpartyintegration.success {
-				border: 1px solid #2F6F2F;
-				background-color:#dfffdf;
-			}
-			.thirdpartyintegration.error {
-				border: 1px solid #bd362f;
-				background-color:#ffdddb;
-			}
-		</style>
+        <style>
+            .thirdpartyintegration-logo { width: 100px; heigh:auto;}
+        </style>
 		<div class='row bg-white' style='margin:25px auto; border:1px solid rgba(0,0,0,0.125); box-shadow:0px 0px 10px rgba(0,0,0,0.125); padding: 10px 20px;'>
 		<div class='" . $class . "8'>
 		<h2>".$smile." " . Text::_("PLG_" . strtoupper($element) . "_AFTER_" . strtoupper($type)) . " <br/>" . Text::_("PLG_" . strtoupper($element)) . "</h2>
@@ -221,18 +204,21 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 
 		echo Text::_("PLG_" . strtoupper($element) . "_WHATS_NEW");
 
+        $uri_root = Uri::root(true);
 
-		$thirdpartyextensions = "";
 
 		/**
 		 * Joomla articles (com_content)
 		 */
 
-		$thirdpartyextensions .= "<div class='thirdpartyintegration success'><span class='thirdpartyintegration-logo'>Joomla Content</span>
-										<div class='media-body'>
-										<p>Plugin <code>System - WT SEO Meta templates - Content</code> for Joomla Content categories and articles.</p>
-										</div>
-									</div>";
+		$thirdpartyextensions = "
+                <table class='table table-striped table-bordered'>
+                    <caption>Provider pLugins for WT SEO Meta templates</caption>
+                    <tbody>
+                    %s
+                </tbody>
+                </table>";
+
 
 		$com_content_url = 'https://web-tolk.ru/get.html?element=wt_seo_meta_templates_content';
 		if (!$this->installDependencies($installer, $com_content_url))
@@ -243,21 +229,39 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 					Text::_('Cannot install or update the data-provider plugin for Joomla Articles. PLease, <a href="' . $com_content_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
 				), 'error'
 			);
-
-		}
+            $installed_message = '<span class="badge bg-danger">not installed</span>';
+		} else {
+            $installed_message = '<span class="badge bg-success">installed</span>';
+        }
+        $thirdpartyextensions_tbody = '
+            <tr>
+                <td><span class="badge bg-primary">Joomla Content</span></td>
+                <td>'.$installed_message.'</td>
+                <td>Plugin <code>System - WT SEO Meta templates - Content</code> for Joomla Content categories and articles.</td>
+            </tr>
+        ';
 
         $com_tags_url = 'https://web-tolk.ru/get.html?element=wt_seo_meta_templates_tags';
 		if (!$this->installDependencies($installer, $com_tags_url))
 		{
 
 			$app->enqueueMessage(
-				Text::sprintf('WT SEO Meta templates - Content not installed or updated',
+				Text::sprintf('WT SEO Meta templates - Tags not installed or updated',
 					Text::_('Cannot install or update the data-provider plugin for Joomla Tags. PLease, <a href="' . $com_content_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
 				), 'error'
 			);
 
-		}
-
+            $installed_message = '<span class="badge bg-danger">not installed</span>';
+        } else {
+            $installed_message = '<span class="badge bg-success">installed</span>';
+        }
+        $thirdpartyextensions_tbody .= '
+            <tr>
+                <td><span class="badge bg-primary">Joomla Tags</span></td>
+                <td>'.$installed_message.'</td>
+                <td>Plugin <code>System - WT SEO Meta templates - Tags</code> for Joomla Tags list and items list by tag.</td>
+            </tr>
+        ';
 		/**
 		 * Virtuemart
 		 */
@@ -267,12 +271,6 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 
 
 			$virtuemart           = simplexml_load_file(JPATH_ADMINISTRATOR . "/components/com_virtuemart/virtuemart.xml");
-			$thirdpartyextensions .= "<div class='thirdpartyintegration success'><img class='thirdpartyintegration-logo' src='" . JUri::root(true) . "/administrator/components/com_virtuemart/assets/images/vm_menulogo.png'/>
-										<div class='media-body'><strong>" . $virtuemart->author . "'s</strong> <strong>" . $virtuemart->name . " v." . $virtuemart->version . "</strong> detected. <a href='" . $virtuemart->authorUrl . "' target='_blank'>" . $virtuemart->authorUrl . "</a> <a href='mailto:" . $virtuemart->authorEmail . "' target='_blank'>" . $virtuemart->authorEmail . "</a>
-										<p>Use plugin <code>System - WT SEO Meta templates - Virtuemart</code>.</p>
-										</div>
-									</div>";
-
 			// Install Virtuemart data-provider plugin
 			$virtuemart_url = 'https://web-tolk.ru/get.html?element=wt_seo_meta_templates_virtuemart';
 			if (!$this->installDependencies($installer, $virtuemart_url))
@@ -284,7 +282,22 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 					), 'error'
 				);
 
-			}
+                $installed_message = '<span class="badge bg-danger">not installed</span>';
+            } else {
+                $installed_message = '<span class="badge bg-success">installed</span>.';
+            }
+
+            $thirdpartyextensions_tbody .= "
+                <tr>
+                    <td>
+                        <img class='thirdpartyintegration-logo' src='$uri_root/administrator/components/com_virtuemart/assets/images/vm_menulogo.png'/>
+                    </td>
+                    <td>$installed_message</td>
+                    <td><strong>$virtuemart->author</strong> <strong>$virtuemart->name v.$virtuemart->version</strong> detected. <a href='$virtuemart->authorUrl' target='_blank'>$virtuemart->authorUrl</a> <a href='mailto:$virtuemart->authorEmail' target='_blank'>$virtuemart->authorEmail</a>
+                        <p>Plugin <code>System - WT SEO Meta templates - Virtuemart</code>.</p>
+                    </td>
+                </tr>    
+            ";
 		}
 
 		/**
@@ -294,23 +307,31 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 		if (file_exists(JPATH_ADMINISTRATOR . '/components/com_jshopping/jshopping.xml'))
 		{
 			$jshop                = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_jshopping/jshopping.xml');
-			$thirdpartyextensions .= "<div class='thirdpartyintegration success'><img class='thirdpartyintegration-logo' src='" . JUri::root(true) . "/administrator/components/com_jshopping/images/jshop_logo.jpg'/>
-													<div class='media-body'><strong>" . $jshop->author . "'s</strong> <strong>" . $jshop->name . " v." . $jshop->version . "</strong> detected. <a href='" . $jshop->authorUrl . "' target='_blank'>" . $jshop->authorUrl . "</a> <a href='mailto:" . $jshop->authorEmail . "' target='_blank'>" . $jshop->authorEmail . "</a>
-													<p>Use plugin <code>System - WT SEO Meta templates - JoomShopping</code>.</p>
-													</div>
-												</div>";
-
-
-			// Install JoomShopping data-provider pkugin
+						// Install JoomShopping data-provider pkugin
 			$jshop_url = 'https://web-tolk.ru/get.html?element=wt_seo_meta_templates_joomshopping';
 			if (!$this->installDependencies($installer, $jshop_url))
 			{
 				$app->enqueueMessage(
 					Text::sprintf('WT SEO Meta templates - JoomShopping not installed or updated',
-						Text::_('Cannot install or update the data-provider plugin for Virtuemart. PLease, <a href="' . $jshop_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
+						Text::_('Cannot install or update the data-provider plugin for JoomShopping. PLease, <a href="' . $jshop_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
 					), 'error'
 				);
-			}
+                $installed_message = '<span class="badge bg-danger">not installed</span>';
+            } else {
+                $installed_message = '<span class="badge bg-success">installed</span>';
+            }
+
+            $thirdpartyextensions_tbody .= "
+                <tr>
+                    <td>
+                        <img class='thirdpartyintegration-logo' src='$uri_root/administrator/components/com_jshopping/images/joomshopping.png'/>
+                    </td>
+                    <td>$installed_message</td>
+                    <td><strong>$jshop->author</strong> <strong>$jshop->name v.$jshop->version</strong> detected. <a href='$jshop->authorUrl' target='_blank'>$jshop->authorUrl</a> <a href='mailto:$jshop->authorEmail' target='_blank'>$jshop->authorEmail</a>
+                        <p>Plugin <code>System - WT SEO Meta templates - JoomShopping</code></p>
+                    </td>
+                </tr>    
+            ";
 		}
 
 		/**
@@ -321,21 +342,30 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 		if (file_exists(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml'))
 		{
 			$phocagallery         = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml');
-			$thirdpartyextensions .= "<div class='thirdpartyintegration success'><img class='thirdpartyintegration-logo' src='" . Uri::root(true) . "/media/com_phocagallery/images/administrator/logo-phoca.png'/>
-													<div class='media-body'><strong>" . $phocagallery->author . "'s</strong> <strong>" . $phocagallery->name . " v." . $phocagallery->version . "</strong> detected. <a href='" . $phocagallery->authorUrl . "' target='_blank'>" . $phocagallery->authorUrl . "</a> <a href='mailto:" . $phocagallery->authorEmail . "' target='_blank'>" . $phocagallery->authorEmail . "</a>
-													<p>Use plugin <code>System - WT SEO Meta templates - Phoca Gallery</code>.</p>
-													</div>
-												</div>";
-
 
 			if (!$this->installDependencies($installer, $com_phocagallery_url))
 			{
 				$app->enqueueMessage(
 					Text::sprintf('WT SEO Meta templates - Phoca Gallery not installed or updated',
-						Text::_('Cannot install or update the data-provider plugin for Virtuemart. PLease, <a href="' . $com_phocagallery_url . '" class="btn btn-small btn-sm btn-primary">download</a> it and install/update manually.')
+						Text::_('Cannot install or update the data-provider plugin for Phoca Gallery. PLease, <a href="' . $com_phocagallery_url . '" class="btn btn-small btn-sm btn-primary">download</a> it and install/update manually.')
 					), 'error'
 				);
-			}
+                $installed_message = '<span class="badge bg-danger">not installed</span>';
+            } else {
+                $installed_message = '<span class="badge bg-success">installed</span>.';
+            }
+
+            $thirdpartyextensions_tbody .= "
+                <tr>
+                    <td>
+                        <img class='thirdpartyintegration-logo' src='$uri_root/media/com_phocagallery/images/administrator/icon-phoca-logo-seal.png'/>
+                    </td>
+                    <td>$installed_message</td>
+                    <td><strong>$phocagallery->author</strong> <strong>$phocagallery->name v.$phocagallery->version</strong> detected. <a href='$phocagallery->authorUrl' target='_blank'>$phocagallery->authorUrl</a> <a href='mailto:$phocagallery->authorEmail' target='_blank'>$phocagallery->authorEmail</a>
+                        <p>Plugin <code>System - WT SEO Meta templates - Phoca Gallery</code>.</p>
+                    </td>
+                </tr>    
+            ";
 		}
 
 
@@ -357,29 +387,33 @@ class plgSystemWt_seo_meta_templatesInstallerScript
 					), 'error'
 				);
 
-			}
+                $installed_message = '<span class="badge bg-danger">not installed</span>';
+            } else {
+                $installed_message = '<span class="badge bg-success">installed</span>.';
+            }
 
+            $note='';
 			$mcs_min_version     = '3.0.77';
 			$mcs_version_compare = version_compare($mcs_min_version, $mcs->version, '<=');
-			if ($mcs_version_compare == true)
+			if ($mcs_version_compare !== true)
 			{
-				$bg_color_css_class = 'success';
-				$note               = '';
-			}
-			else
-			{
-				$bg_color_css_class = 'warning';
 				$note               = "Note, You can only use the names of countries, provinces, and cities in one case in versions earlier <strong>" . $mcs_min_version . "</strong>";
 			}
 
-			$thirdpartyextensions .= "<div class='thirdpartyintegration " . $bg_color_css_class . "'><span class='thirdpartyintegration-logo'>MyCitySelector</span>
-											<div class='media-body'><strong>" . $mcs->author . "'s</strong> extension <strong>" . $mcs->name . " v." . $mcs->version . "</strong> detected. <a href='" . $mcs->authorUrl . "' target='_blank'>" . $mcs->authorUrl . "</a> <a href='mailto:" . $mcs->authorEmail . "' target='_blank'>" . $mcs->authorEmail . "</a><p>" . $note . "</p>
-											<p>Use plugin <code>System - WT SEO Meta templates - My City Selector</code>.</p>
-											</div>
-										</div>";
+            $thirdpartyextensions_tbody .= "
+                <tr>
+                    <td>
+                        <span class='badge bg-primary'>MCS</span>
+                    </td>
+                    <td>$installed_message</td>
+                    <td><strong>$mcs->author</strong> <strong>$mcs->name v.$mcs->version</strong> detected. <a href='$mcs->authorUrl' target='_blank'>$mcs->authorUrl</a> <a href='mailto:$mcs->authorEmail' target='_blank'>$mcs->authorEmail</a>
+                        <p>Plugin <code>System - WT SEO Meta templates - My City Selector</code>. $note.</p>
+                    </td>
+                </tr>    
+            ";
 		}
 
-
+        $thirdpartyextensions = sprintf($thirdpartyextensions,$thirdpartyextensions_tbody);
 		echo "<h4>Supported third-party extensions was found</h4>" . $thirdpartyextensions;
 
 
