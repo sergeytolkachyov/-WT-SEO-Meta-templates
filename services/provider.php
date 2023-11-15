@@ -33,7 +33,9 @@ return new class implements ServiceProviderInterface {
             function (Container $container) {
                 $subject = $container->get(DispatcherInterface::class);
                 $config = (array)PluginHelper::getPlugin('system', 'wt_seo_meta_templates');
-                return new Wt_seo_meta_templates($subject, $config);
+                $plugin = new Wt_seo_meta_templates($subject, $config);
+                $plugin->setApplication(\Joomla\CMS\Factory::getApplication());
+                return $plugin;
             }
         );
     }

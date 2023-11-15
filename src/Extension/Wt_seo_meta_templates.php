@@ -2,11 +2,11 @@
 
 /**
  * @package     WT SEO Meta templates
- * @version     2.0.1
- * @Author        Sergey Tolkachyov, https://web-tolk.ru
+ * @version     2.0.2
+ * @Author      Sergey Tolkachyov, https://web-tolk.ru
  * @copyright   Copyright (C) 2023 Sergey Tolkachyov
  * @license     GNU/GPL 3
- * @since        1.0.0
+ * @since       1.0.0
  */
 
 namespace Joomla\Plugin\System\Wt_seo_meta_templates\Extension;
@@ -15,23 +15,39 @@ namespace Joomla\Plugin\System\Wt_seo_meta_templates\Extension;
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Plugin\CMSPlugin;
-use Joomla\CMS\Factory;
 use Joomla\CMS\Profiler\Profiler;
+use Joomla\Event\SubscriberInterface;
 
-class Wt_seo_meta_templates extends CMSPlugin
+class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterface
 {
     protected $autoloadLanguage = true;
+    protected $allowLegacyListeners = false;
 
-    public function onBeforeCompileHead()
+    /**
+     * @inheritDoc
+     *
+     * @return string[]
+     *
+     * @throws \Exception
+     * @since 4.1.0
+     *
+     */
+    public static function getSubscribedEvents(): array
+    {
+        return [
+            'onBeforeCompileHead' => 'onBeforeCompileHead'
+        ];
+    }
+
+    public function onBeforeCompileHead() : void
     {
         //Работаем только на фронте
-        $app = Factory::getApplication();
-        if (!$app->isClient('site'))
-        {
+        $app = $this->getApplication();
+        if (!$app->isClient('site')) {
             return;
         }
         !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: start');
-        $doc = Factory::getApplication()->getDocument();
+        $doc = $app->getDocument();
         // получаем переменные от сторонних плагинов
         !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: Before additional plugins import');
         $results = $app->triggerEvent('onWt_seo_meta_templatesAddVariables', array());
@@ -78,9 +94,9 @@ class Wt_seo_meta_templates extends CMSPlugin
         !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: After getHeadData');
         //Обрабатываем шорт-коды
         foreach ($allVariables as $variable) {
-            $head['title'] = str_replace('{' . strtoupper($variable->variable) . '}', $variable->value, $head['title']);
+            $head['title'] = str_replace('{' . strtoupper($variable->variable) . '}', (!empty($variable->value) ? $variable->value : ''), $head['title']);
             if (!empty($head['description'])) {
-                $head['description'] = str_replace('{' . strtoupper($variable->variable) . '}', $variable->value, $head['description']);
+                $head['description'] = str_replace('{' . strtoupper($variable->variable) . '}', (!empty($variable->value) ? $variable->value : ''), $head['description']);
             }
         }
 
@@ -99,21 +115,22 @@ class Wt_seo_meta_templates extends CMSPlugin
      */
     public function onAfterRender(): void
     {
-        if (!Factory::getApplication()->isClient('site')) {
+        $app = $this->getApplication();
+        if (!$app->isClient('site')) {
             return;
         }
 
-        $doc = Factory::getApplication()->getDocument();
+        $doc = $app->getDocument();
         if (!($doc instanceof \Joomla\CMS\Document\HtmlDocument)) {
             return;
         }
 
-        $session = Factory::getApplication()->getSession();
+        $session = $app->getSession();
         $debug_info = $session->get("wtseometatemplatesdebugoutput");
         if (empty($debug_info)) {
             return;
         }
-        $buffer = Factory::getApplication()->getBody();
+        $buffer = $app->getBody();
         $html = [];
         if ($this->params->get('show_debug') == 0) {
             return;
@@ -127,8 +144,7 @@ class Wt_seo_meta_templates extends CMSPlugin
 
         if (!empty($html)) {
             $buffer = preg_replace('/(<body.*>)/Ui', '$1' . implode('', $html), $buffer);
-            Factory::getApplication()->setBody($buffer);
+            $app->setBody($buffer);
         }
-
     }
 }
