@@ -24,9 +24,8 @@ class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterface
     protected $allowLegacyListeners = false;
 
     /**
-     * @inheritDoc
      *
-     * @return string[]
+     * @return array
      *
      * @throws \Exception
      * @since 4.1.0
