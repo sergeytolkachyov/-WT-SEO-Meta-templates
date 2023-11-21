@@ -35,16 +35,16 @@ class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            'onBeforeCompileHead' => 'onBeforeCompileHead'
+            'onBeforeCompileHead' => 'onBeforeCompileHead',
+            'onAfterRender' => 'onAfterRender',
         ];
     }
 
-    public function onBeforeCompileHead(): void
+    public function onBeforeCompileHead($event): void
     {
         //Работаем только на фронте
         $app = $this->getApplication();
-        if (!$app->isClient('site'))
-        {
+        if (!$app->isClient('site')) {
             return;
         }
         !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: start');
@@ -55,71 +55,60 @@ class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterface
             'subject' => $this
         ]);
         $app->getDispatcher()->dispatch($event->getName(), $event);
-        $results = $event->getArgument('result');
+        $result = $event->getArgument('result');
 
         !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: After additional plugins import');
 
-        $allVariables = array();
+        $allVariables = [];
 
-        if (is_array($results))
-        {
-            foreach ($results as $result)
-            {
-                if (is_array($result))
-                {
-                    // Загружаем переменные из плагинов
-                    if (is_array($result['variables']))
-                    {
+        if (is_array($result)) {
+            $title = '';
+            $description = '';
 
-                        foreach ($result['variables'] as $variable_array)
-                        {
-                            $allVariables[] = (object) $variable_array;
-                        }
-                    }
-
-                    // Загружаем тайтл, если пришёл
-                    if (is_array($result['seo_tags_templates']) && array_key_exists('title', $result['seo_tags_templates']))
-                    {
-                        $title = $result['seo_tags_templates']['title'];
-                    }
-                    // Загружаем дескрипшн, если пришёл
-                    if (is_array($result['seo_tags_templates']) && array_key_exists('description', $result['seo_tags_templates']))
-                    {
-                        $description = $result['seo_tags_templates']['description'];
-                    }
+            // Загружаем переменные из плагинов
+            if (is_array($result['variables'])) {
+                foreach ($result['variables'] as $variable_array) {
+                    $allVariables[] = $variable_array;
                 }
             }
-        }
-        $allVariables = (object) $allVariables;
 
-        !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: Before getHeadData');
-        $head = $doc->getHeadData();
+            // Загружаем тайтл, если пришёл
+            if (is_array($result['seo_tags_templates']) && array_key_exists('title', $result['seo_tags_templates'])) {
+                $title = $result['seo_tags_templates']['title'];
 
-        // Если есть формулы тайтлов и дескрипшнов из плагинов - заменяем их.
-        if (!empty($title))
-        {
-            $head['title'] = $title;
-        }
-        if (!empty($description))
-        {
-            $head['description'] = $description;
-        }
-
-        !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: After getHeadData');
-        //Обрабатываем шорт-коды
-        foreach ($allVariables as $variable)
-        {
-            $head['title'] = str_replace('{' . strtoupper($variable->variable) . '}', (!empty($variable->value) ? $variable->value : ''), $head['title']);
-            if (!empty($head['description']))
-            {
-                $head['description'] = str_replace('{' . strtoupper($variable->variable) . '}', (!empty($variable->value) ? $variable->value : ''), $head['description']);
             }
+            // Загружаем дескрипшн, если пришёл
+            if (is_array($result['seo_tags_templates']) && array_key_exists('description', $result['seo_tags_templates'])) {
+                $description = $result['seo_tags_templates']['description'];
+            }
+
+            $allVariables = (object)$allVariables;
+
+            !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: Before getHeadData');
+            $head = $doc->getHeadData();
+
+            // Если есть формулы тайтлов и дескрипшнов из плагинов - заменяем их.
+            if (!empty($title)) {
+                $head['title'] = $title;
+            }
+
+            if (!empty($description)) {
+                $head['description'] = $description;
+            }
+
+            !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: After getHeadData');
+            //Обрабатываем шорт-коды
+            foreach ($allVariables as $variable) {
+                $head['title'] = str_replace('{' . strtoupper($variable['variable']) . '}', (!empty($variable['value']) ? $variable['value'] : ''), $head['title']);
+                if (!empty($head['description'])) {
+                    $head['description'] = str_replace('{' . strtoupper($variable['variable']) . '}', (!empty($variable['value']) ? $variable['value'] : ''), $head['description']);
+                }
+            }
+
+            !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: After variables replace');
+            $doc->setHeadData($head);
+            !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: end');
         }
-
-        !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: After variables replace');
-        $doc->setHeadData($head);
-        !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: end');
-
     }
 
     /**
@@ -129,30 +118,26 @@ class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterface
      * @throws \Exception
      * @since 2.0.0
      */
-    public function onAfterRender(): void
+    public function onAfterRender($event): void
     {
         $app = $this->getApplication();
-        if (!$app->isClient('site'))
-        {
+        if (!$app->isClient('site')) {
             return;
         }
 
         $doc = $app->getDocument();
-        if (!($doc instanceof \Joomla\CMS\Document\HtmlDocument))
-        {
+        if (!($doc instanceof \Joomla\CMS\Document\HtmlDocument)) {
             return;
         }
 
-        $session    = $app->getSession();
+        $session = $app->getSession();
         $debug_info = $session->get("wtseometatemplatesdebugoutput");
-        if (empty($debug_info))
-        {
+        if (empty($debug_info)) {
             return;
         }
         $buffer = $app->getBody();
-        $html   = [];
-        if ($this->params->get('show_debug') == 0)
-        {
+        $html = [];
+        if ($this->params->get('show_debug') == 0) {
             return;
         }
 
@@ -162,8 +147,7 @@ class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterface
         $html[] = '</details>';
         $session->clear("wtseometatemplatesdebugoutput");
 
-        if (!empty($html))
-        {
+        if (!empty($html)) {
             $buffer = preg_replace('/(<body.*>)/Ui', '$1' . implode('', $html), $buffer);
             $app->setBody($buffer);
         }
