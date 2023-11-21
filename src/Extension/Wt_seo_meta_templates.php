@@ -19,7 +19,7 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Profiler\Profiler;
 use Joomla\Event\SubscriberInterface;
 
-class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterface
+final class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterface
 {
     protected $autoloadLanguage = true;
     protected $allowLegacyListeners = false;
