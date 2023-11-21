@@ -16,6 +16,7 @@ use Joomla\CMS\Filesystem\File;
 use Joomla\CMS\Filesystem\Folder;
 use Joomla\CMS\Filesystem\Path;
 use Joomla\CMS\Installer\Installer;
+use Joomla\CMS\Installer\InstallerHelper;
 use Joomla\CMS\Installer\InstallerAdapter;
 use Joomla\CMS\Installer\InstallerScriptInterface;
 use Joomla\CMS\Language\Text;
@@ -66,6 +67,12 @@ return new class () implements ServiceProviderInterface {
              * @since  1.0.0
              */
             protected string $minimumPhp = '7.4';
+
+            /**
+             * @var array $providersInstallationMessageQueue
+             * @since 2.0.3
+             */
+            protected $providersInstallationMessageQueue = [];
 
             /**
              * Constructor.
@@ -164,7 +171,7 @@ return new class () implements ServiceProviderInterface {
                     $smile = ':(';
                 }
 
-                $element = strtoupper($adapter->getElement());
+                $element = 'PLG_' . strtoupper($adapter->getElement());
                 $type = strtoupper($type);
 
                 $html = '
@@ -175,45 +182,30 @@ return new class () implements ServiceProviderInterface {
 
                 $html .= Text::_($element . '_WHATS_NEW');
 
-                $uri_root = Uri::root(true);
-
                 /**
                  * Joomla articles (com_content)
                  */
 
-                $thirdpartyextensions = "
-                <table class='table table-striped table-bordered'>
-                    <caption>Provider pLugins for WT SEO Meta templates</caption>
-                    <tbody>
-                    %s
-                </tbody>
-                </table>";
-
-
                 $com_content_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_content';
-                if (!$this->installDependencies($adapter, $com_content_url))
-                {
+                if (!$this->installDependencies($adapter, $com_content_url)) {
 
                     $this->app->enqueueMessage(
                         Text::sprintf('WT SEO Meta templates - Content not installed or updated',
                             Text::_('Cannot install or update the data-provider plugin for Joomla Articles. PLease, <a href="' . $com_content_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
                         ), 'error'
                     );
-                    $installed_message = '<span class="badge bg-danger">not installed</span>';
+                    $installed_message = false;
                 } else {
-                    $installed_message = '<span class="badge bg-success">installed</span>';
+                    $installed_message = true;
                 }
-                $thirdpartyextensions_tbody = '
-            <tr>
-                <td><span class="badge bg-primary">Joomla Content</span></td>
-                <td>'.$installed_message.'</td>
-                <td>Plugin <code>System - WT SEO Meta templates - Content</code> for Joomla Content categories and articles.</td>
-            </tr>
-        ';
 
+                $this->enqueueProvidersInstallationMessage('System - WT SEO Meta templates - Content','Plugin for Joomla Content categories and articles.',$installed_message);
+
+                /**
+                 * com_tags
+                 */
                 $com_tags_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_tags';
-                if (!$this->installDependencies($adapter, $com_tags_url))
-                {
+                if (!$this->installDependencies($adapter, $com_tags_url)) {
 
                     $this->app->enqueueMessage(
                         Text::sprintf('WT SEO Meta templates - Tags not installed or updated',
@@ -221,30 +213,26 @@ return new class () implements ServiceProviderInterface {
                         ), 'error'
                     );
 
-                    $installed_message = '<span class="badge bg-danger">not installed</span>';
+                    $installed_message = false;
                 } else {
-                    $installed_message = '<span class="badge bg-success">installed</span>';
+                    $installed_message = true;
                 }
-                $thirdpartyextensions_tbody .= '
-            <tr>
-                <td><span class="badge bg-primary">Joomla Tags</span></td>
-                <td>'.$installed_message.'</td>
-                <td>Plugin <code>System - WT SEO Meta templates - Tags</code> for Joomla Tags list and items list by tag.</td>
-            </tr>
-        ';
+
+                $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - Tags",
+                    "Plugin for Joomla Tags list and items list by tag.", $installed_message);
+
                 /**
                  * Virtuemart
                  */
 
-                if (file_exists(JPATH_ADMINISTRATOR . "/components/com_virtuemart/virtuemart.xml"))
-                {
+                if (file_exists(JPATH_ADMINISTRATOR . "/components/com_virtuemart/virtuemart.xml")) {
 
 
-                    $virtuemart           = simplexml_load_file(JPATH_ADMINISTRATOR . "/components/com_virtuemart/virtuemart.xml");
+                    $virtuemart = simplexml_load_file(JPATH_ADMINISTRATOR . "/components/com_virtuemart/virtuemart.xml");
                     // Install Virtuemart data-provider plugin
+
                     $virtuemart_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_virtuemart';
-                    if (!$this->installDependencies($adapter, $virtuemart_url))
-                    {
+                    if (!$this->installDependencies($adapter, $virtuemart_url)) {
 
                         $this->app->enqueueMessage(
                             Text::sprintf('WT SEO Meta templates - Virtuemart not installed or updated',
@@ -252,56 +240,37 @@ return new class () implements ServiceProviderInterface {
                             ), 'error'
                         );
 
-                        $installed_message = '<span class="badge bg-danger">not installed</span>';
+                        $installed_message = false;
                     } else {
-                        $installed_message = '<span class="badge bg-success">installed</span>.';
+                        $installed_message = true;
                     }
 
-                    $thirdpartyextensions_tbody .= "
-                <tr>
-                    <td>
-                        <img class='thirdpartyintegration-logo' src='$uri_root/administrator/components/com_virtuemart/assets/images/vm_menulogo.png'/>
-                    </td>
-                    <td>$installed_message</td>
-                    <td><strong>$virtuemart->author</strong> <strong>$virtuemart->name v.$virtuemart->version</strong> detected. <a href='$virtuemart->authorUrl' target='_blank'>$virtuemart->authorUrl</a> <a href='mailto:$virtuemart->authorEmail' target='_blank'>$virtuemart->authorEmail</a>
-                        <p>Plugin <code>System - WT SEO Meta templates - Virtuemart</code>.</p>
-                    </td>
-                </tr>    
-            ";
+                    $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - Virtuemart",
+                        "<strong>$virtuemart->author</strong> <strong>$virtuemart->name v.$virtuemart->version</strong> detected. <a href='$virtuemart->authorUrl' target='_blank'>$virtuemart->authorUrl</a> <a href='mailto:$virtuemart->authorEmail' target='_blank'>$virtuemart->authorEmail</a>", $installed_message);
                 }
 
                 /**
                  * JoomShopping
                  */
 
-                if (file_exists(JPATH_ADMINISTRATOR . '/components/com_jshopping/jshopping.xml'))
-                {
-                    $jshop                = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_jshopping/jshopping.xml');
+                if (file_exists(JPATH_ADMINISTRATOR . '/components/com_jshopping/jshopping.xml')) {
+                    $jshop = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_jshopping/jshopping.xml');
                     // Install JoomShopping data-provider pkugin
                     $jshop_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_joomshopping';
-                    if (!$this->installDependencies($adapter, $jshop_url))
-                    {
+                    if (!$this->installDependencies($adapter, $jshop_url)) {
                         $this->app->enqueueMessage(
                             Text::sprintf('WT SEO Meta templates - JoomShopping not installed or updated',
                                 Text::_('Cannot install or update the data-provider plugin for JoomShopping. PLease, <a href="' . $jshop_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
                             ), 'error'
                         );
-                        $installed_message = '<span class="badge bg-danger">not installed</span>';
+                        $installed_message = false;
                     } else {
-                        $installed_message = '<span class="badge bg-success">installed</span>';
+                        $installed_message = true;
                     }
 
-                    $thirdpartyextensions_tbody .= "
-                <tr>
-                    <td>
-                        <img class='thirdpartyintegration-logo' src='$uri_root/administrator/components/com_jshopping/images/joomshopping.png'/>
-                    </td>
-                    <td>$installed_message</td>
-                    <td><strong>$jshop->author</strong> <strong>$jshop->name v.$jshop->version</strong> detected. <a href='$jshop->authorUrl' target='_blank'>$jshop->authorUrl</a> <a href='mailto:$jshop->authorEmail' target='_blank'>$jshop->authorEmail</a>
-                        <p>Plugin <code>System - WT SEO Meta templates - JoomShopping</code></p>
-                    </td>
-                </tr>    
-            ";
+                    $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - JoomShopping",
+                        "<strong>$jshop->author</strong> <strong>$jshop->name v.$jshop->version</strong> detected. <a href='$jshop->authorUrl' target='_blank'>$jshop->authorUrl</a> <a href='mailto:$jshop->authorEmail' target='_blank'>$jshop->authorEmail</a>", $installed_message);
+
                 }
 
                 /**
@@ -309,33 +278,21 @@ return new class () implements ServiceProviderInterface {
                  */
 
                 $com_phocagallery_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_phoca_gallery';
-                if (file_exists(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml'))
-                {
-                    $phocagallery         = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml');
+                if (file_exists(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml')) {
+                    $phocagallery = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml');
 
-                    if (!$this->installDependencies($adapter, $com_phocagallery_url))
-                    {
+                    if (!$this->installDependencies($adapter, $com_phocagallery_url)) {
                         $this->app->enqueueMessage(
                             Text::sprintf('WT SEO Meta templates - Phoca Gallery not installed or updated',
                                 Text::_('Cannot install or update the data-provider plugin for Phoca Gallery. PLease, <a href="' . $com_phocagallery_url . '" class="btn btn-small btn-sm btn-primary">download</a> it and install/update manually.')
                             ), 'error'
                         );
-                        $installed_message = '<span class="badge bg-danger">not installed</span>';
+                        $installed_message = false;
                     } else {
-                        $installed_message = '<span class="badge bg-success">installed</span>.';
+                        $installed_message = true;
                     }
-
-                    $thirdpartyextensions_tbody .= "
-                <tr>
-                    <td>
-                        <img class='thirdpartyintegration-logo' src='$uri_root/media/com_phocagallery/images/administrator/icon-phoca-logo-seal.png'/>
-                    </td>
-                    <td>$installed_message</td>
-                    <td><strong>$phocagallery->author</strong> <strong>$phocagallery->name v.$phocagallery->version</strong> detected. <a href='$phocagallery->authorUrl' target='_blank'>$phocagallery->authorUrl</a> <a href='mailto:$phocagallery->authorEmail' target='_blank'>$phocagallery->authorEmail</a>
-                        <p>Plugin <code>System - WT SEO Meta templates - Phoca Gallery</code>.</p>
-                    </td>
-                </tr>    
-            ";
+                    $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - Phoca Gallery",
+                        "<strong>$phocagallery->author</strong> <strong>$phocagallery->name v.$phocagallery->version</strong> detected. <a href='$phocagallery->authorUrl' target='_blank'>$phocagallery->authorUrl</a> <a href='mailto:$phocagallery->authorEmail' target='_blank'>$phocagallery->authorEmail</a>", $installed_message);
                 }
 
 
@@ -343,48 +300,33 @@ return new class () implements ServiceProviderInterface {
                  * My City Selector package
                  */
 
-                if (file_exists(JPATH_SITE . "/administrator/manifests/packages/pkg_mycityselector.xml"))
-                {
+                if (file_exists(JPATH_SITE . "/administrator/manifests/packages/pkg_mycityselector.xml")) {
 
                     $mcs = simplexml_load_file(JPATH_SITE . "/administrator/manifests/packages/pkg_mycityselector.xml");
                     // Install My City Selector data-provider plugin
                     $mcs_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_mcs';
-                    if (!$this->installDependencies($adapter, $mcs_url))
-                    {
+                    if (!$this->installDependencies($adapter, $mcs_url)) {
                         $this->app->enqueueMessage(
                             Text::sprintf('WT SEO Meta templates - My City Selector not installed or updated',
                                 Text::_('Cannot install or update the data-provider plugin for My City Selector. PLease, download it and install/update manually. ' . $mcs_url)
                             ), 'error'
                         );
 
-                        $installed_message = '<span class="badge bg-danger">not installed</span>';
+                        $installed_message = false;
                     } else {
-                        $installed_message = '<span class="badge bg-success">installed</span>.';
+                        $installed_message = true;
                     }
 
-                    $note='';
-                    $mcs_min_version     = '3.0.77';
+                    $note = '';
+                    $mcs_min_version = '3.0.77';
                     $mcs_version_compare = version_compare($mcs_min_version, $mcs->version, '<=');
-                    if ($mcs_version_compare !== true)
-                    {
-                        $note               = "Note, You can only use the names of countries, provinces, and cities in one case in versions earlier <strong>" . $mcs_min_version . "</strong>";
+                    if ($mcs_version_compare !== true) {
+                        $note = "Note, You can only use the names of countries, provinces, and cities in one case in versions earlier <strong>" . $mcs_min_version . "</strong>";
                     }
-
-                    $thirdpartyextensions_tbody .= "
-                <tr>
-                    <td>
-                        <span class='badge bg-primary'>MCS</span>
-                    </td>
-                    <td>$installed_message</td>
-                    <td><strong>$mcs->author</strong> <strong>$mcs->name v.$mcs->version</strong> detected. <a href='$mcs->authorUrl' target='_blank'>$mcs->authorUrl</a> <a href='mailto:$mcs->authorEmail' target='_blank'>$mcs->authorEmail</a>
-                        <p>Plugin <code>System - WT SEO Meta templates - My City Selector</code>. $note.</p>
-                    </td>
-                </tr>    
-            ";
+                    $this->enqueueProvidersInstallationMessage('WT SEO Meta templates - My City Selector','Data-provider plugin for My City Selector. '.$note, $installed_message);
                 }
 
-                $thirdpartyextensions = sprintf($thirdpartyextensions,$thirdpartyextensions_tbody);
-                echo "<h4>Supported third-party extensions was found</h4>" . $thirdpartyextensions;
+                $html .= $this->prepareProvidersInstallationMessage();
 
 
                 $html .= '</div>
@@ -395,10 +337,9 @@ return new class () implements ServiceProviderInterface {
 					<a class="btn btn-sm btn-outline-primary" href="https://web-tolk.ru" target="_blank"> https://web-tolk.ru</a>
 					<a class="btn btn-sm btn-outline-primary" href="mailto:info@web-tolk.ru"><i class="icon-envelope"></i> info@web-tolk.ru</a>
 				</p>
-				<p><a class="btn btn-danger w-100" href="https://t.me/joomlaru" target="_blank">'.Text::_($element.'_JOOMLARU_TELEGRAM_CHAT').'</a></p>
+				<p><a class="btn btn-danger w-100" href="https://t.me/joomlaru" target="_blank">' . Text::_($element . '_JOOMLARU_TELEGRAM_CHAT') . '</a></p>
 				' . Text::_($element . "_MAYBE_INTERESTING") . '
 				</div>
-
 				';
                 $this->app->enqueueMessage($html, 'info');
                 return true;
@@ -427,69 +368,66 @@ return new class () implements ServiceProviderInterface {
 
 
             /**
-             * @param $parent
+             * @param $adapter
              *
+             * @return bool
              * @throws Exception
              *
              *
-             * @return bool
              * @since 1.0.0
              */
-            protected function installDependencies($parent, $url)
+            protected function installDependencies($adapter, $url)
             {
                 // Load installer plugins for assistance if required:
                 PluginHelper::importPlugin('installer');
-
-                $app = Factory::getApplication();
 
                 $package = null;
 
                 // This event allows an input pre-treatment, a custom pre-packing or custom installation.
                 // (e.g. from a JSON description).
-                $results = $app->triggerEvent('onInstallerBeforeInstallation', array($this, &$package));
-
-                if (in_array(true, $results, true))
-                {
-                    return true;
-                }
-
-                if (in_array(false, $results, true))
-                {
-                    return false;
-                }
+//                $results = $this->app->triggerEvent('onInstallerBeforeInstallation', array($this, &$package));
+//
+//                if (in_array(true, $results, true))
+//                {
+//                    return true;
+//                }
+//
+//                if (in_array(false, $results, true))
+//                {
+//                    return false;
+//                }
 
 
                 // Download the package at the URL given.
                 $p_file = InstallerHelper::downloadPackage($url);
 
                 // Was the package downloaded?
-                if (!$p_file)
-                {
-                    $app->enqueueMessage(Text::_('COM_INSTALLER_MSG_INSTALL_INVALID_URL'), 'error');
+                if (!$p_file) {
+                    $this->app->enqueueMessage(Text::_('COM_INSTALLER_MSG_INSTALL_INVALID_URL'), 'error');
 
                     return false;
                 }
 
-                $config   = Factory::getConfig();
+                $config = Factory::getContainer()->get('config');
                 $tmp_dest = $config->get('tmp_path');
 
                 // Unpack the downloaded package file.
                 $package = InstallerHelper::unpack($tmp_dest . '/' . $p_file, true);
 
                 // This event allows a custom installation of the package or a customization of the package:
-                $results = $app->triggerEvent('onInstallerBeforeInstaller', array($this, &$package));
+//                $results = $this->app->triggerEvent('onInstallerBeforeInstaller', array($this, &$package));
 
-                if (in_array(true, $results, true))
-                {
-                    return true;
-                }
+//                if (in_array(true, $results, true))
+//                {
+//                    return true;
+//                }
 
-                if (in_array(false, $results, true))
-                {
-                    InstallerHelper::cleanupInstall($package['packagefile'], $package['extractdir']);
-
-                    return false;
-                }
+//                if (in_array(false, $results, true))
+//                {
+//                    InstallerHelper::cleanupInstall($package['packagefile'], $package['extractdir']);
+//
+//                    return false;
+//                }
 
                 // Get an installer instance.
                 $installer = new Installer();
@@ -501,54 +439,47 @@ return new class () implements ServiceProviderInterface {
                  * This must be done before the unpacked check because JInstallerHelper::detectType() returns a boolean false since the manifest
                  * can't be found in the expected location.
                  */
-                if (is_array($package) && isset($package['dir']) && is_dir($package['dir']))
-                {
+                if (is_array($package) && isset($package['dir']) && is_dir($package['dir'])) {
                     $installer->setPath('source', $package['dir']);
 
-                    if (!$installer->findManifest())
-                    {
+                    if (!$installer->findManifest()) {
                         InstallerHelper::cleanupInstall($package['packagefile'], $package['extractdir']);
-                        $app->enqueueMessage(Text::sprintf('COM_INSTALLER_INSTALL_ERROR', '.'), 'warning');
+                        $this->app->enqueueMessage(Text::sprintf('COM_INSTALLER_INSTALL_ERROR', '.'), 'warning');
 
                         return false;
                     }
                 }
 
                 // Was the package unpacked?
-                if (!$package || !$package['type'])
-                {
+                if (!$package || !$package['type']) {
                     InstallerHelper::cleanupInstall($package['packagefile'], $package['extractdir']);
-                    $app->enqueueMessage(Text::_('COM_INSTALLER_UNABLE_TO_FIND_INSTALL_PACKAGE'), 'error');
+                    $this->app->enqueueMessage(Text::_('COM_INSTALLER_UNABLE_TO_FIND_INSTALL_PACKAGE'), 'error');
 
                     return false;
                 }
 
                 // Install the package.
-                if (!$installer->install($package['dir']))
-                {
+                if (!$installer->install($package['dir'])) {
                     // There was an error installing the package.
-                    $msg     = Text::sprintf('COM_INSTALLER_INSTALL_ERROR',
+                    $msg = Text::sprintf('COM_INSTALLER_INSTALL_ERROR',
                         Text::_('COM_INSTALLER_TYPE_TYPE_' . strtoupper($package['type'])));
-                    $result  = false;
+                    $result = false;
                     $msgType = 'error';
-                }
-                else
-                {
+                } else {
                     // Package installed successfully.
-                    $msg     = Text::sprintf('COM_INSTALLER_INSTALL_SUCCESS',
+                    $msg = Text::sprintf('COM_INSTALLER_INSTALL_SUCCESS',
                         Text::_('COM_INSTALLER_TYPE_TYPE_' . strtoupper($package['type'])));
-                    $result  = true;
+                    $result = true;
                     $msgType = 'message';
                 }
 
                 // This event allows a custom a post-flight:
-                $app->triggerEvent('onInstallerAfterInstaller', array($parent, &$package, $installer, &$result, &$msg));
+//                $this->app->triggerEvent('onInstallerAfterInstaller', array($adapter, &$package, $installer, &$result, &$msg));
 
-                $app->enqueueMessage($msg, $msgType);
+                $this->app->enqueueMessage($msg, $msgType);
 
                 // Cleanup the install files.
-                if (!is_file($package['packagefile']))
-                {
+                if (!is_file($package['packagefile'])) {
                     $package['packagefile'] = $config->get('tmp_path') . '/' . $package['packagefile'];
                 }
 
@@ -556,6 +487,43 @@ return new class () implements ServiceProviderInterface {
 
                 return $result;
             }
+
+            private function enqueueProvidersInstallationMessage(string $header, string $description, $install_result): void
+            {
+                $this->providersInstallationMessageQueue[] = [
+                    'header' => $header,
+                    'description' => $description,
+                    'install_result' => $install_result,
+                ];
+            }
+
+            private function prepareProvidersInstallationMessage(): string
+            {
+                if(is_array($this->providersInstallationMessageQueue) && count($this->providersInstallationMessageQueue) > 0)
+                {
+                    $messages = [
+                        "<div class=\"bg-light p-4\"><h4>Supported third-party extensions was found</h4>",
+                        "<ul class=\"list-group list-group-flush\">"
+                    ];
+                    foreach ($this->providersInstallationMessageQueue as $message){
+
+
+                        $messages[] = "<li class=\"list-group-item d-flex justify-content-between align-items-center\">
+                                <div><h4>".$message['header']."</h4>
+                                <p>".$message['description']."</p>
+                                </div>
+                                ".(($message['install_result'] == true) ? "<span class=\"badge bg-success\">installed</span>" : "<span class=\"badge bg-danger\">not installed</span>")."                                
+                        </li>";
+                    }
+                    $messages[] = '</ul></div>';
+
+                    $this->providersInstallationMessageQueue = [];
+                    return implode('',$messages);
+                }
+
+                return '';
+            }
+
         });
     }
 };
