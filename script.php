@@ -182,61 +182,35 @@ return new class () implements ServiceProviderInterface {
 
                 $html .= Text::_($element . '_WHATS_NEW');
 
-                /**
-                 * Joomla articles (com_content)
-                 */
+                if ($type !== 'uninstall') {
+                    /**
+                     * Joomla articles (com_content)
+                     */
 
-                $com_content_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_content';
-                if (!$this->installDependencies($adapter, $com_content_url)) {
-
-                    $this->app->enqueueMessage(
-                        Text::sprintf('WT SEO Meta templates - Content not installed or updated',
-                            Text::_('Cannot install or update the data-provider plugin for Joomla Articles. PLease, <a href="' . $com_content_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
-                        ), 'error'
-                    );
-                    $installed_message = false;
-                } else {
-                    $installed_message = true;
-                }
-
-                $this->enqueueProvidersInstallationMessage('System - WT SEO Meta templates - Content','Plugin for Joomla Content categories and articles.',$installed_message);
-
-                /**
-                 * com_tags
-                 */
-                $com_tags_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_tags';
-                if (!$this->installDependencies($adapter, $com_tags_url)) {
-
-                    $this->app->enqueueMessage(
-                        Text::sprintf('WT SEO Meta templates - Tags not installed or updated',
-                            Text::_('Cannot install or update the data-provider plugin for Joomla Tags. PLease, <a href="' . $com_content_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
-                        ), 'error'
-                    );
-
-                    $installed_message = false;
-                } else {
-                    $installed_message = true;
-                }
-
-                $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - Tags",
-                    "Plugin for Joomla Tags list and items list by tag.", $installed_message);
-
-                /**
-                 * Virtuemart
-                 */
-
-                if (file_exists(JPATH_ADMINISTRATOR . "/components/com_virtuemart/virtuemart.xml")) {
-
-
-                    $virtuemart = simplexml_load_file(JPATH_ADMINISTRATOR . "/components/com_virtuemart/virtuemart.xml");
-                    // Install Virtuemart data-provider plugin
-
-                    $virtuemart_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_virtuemart';
-                    if (!$this->installDependencies($adapter, $virtuemart_url)) {
+                    $com_content_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_content';
+                    if (!$this->installDependencies($adapter, $com_content_url)) {
 
                         $this->app->enqueueMessage(
-                            Text::sprintf('WT SEO Meta templates - Virtuemart not installed or updated',
-                                Text::_('Cannot install or update the data-provider plugin for Virtuemart. PLease, <a href="' . $virtuemart_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
+                            Text::sprintf('WT SEO Meta templates - Content not installed or updated',
+                                Text::_('Cannot install or update the data-provider plugin for Joomla Articles. PLease, <a href="' . $com_content_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
+                            ), 'error'
+                        );
+                        $installed_message = false;
+                    } else {
+                        $installed_message = true;
+                    }
+
+                    $this->enqueueProvidersInstallationMessage('System - WT SEO Meta templates - Content', 'Plugin for Joomla Content categories and articles.', $installed_message);
+
+                    /**
+                     * com_tags
+                     */
+                    $com_tags_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_tags';
+                    if (!$this->installDependencies($adapter, $com_tags_url)) {
+
+                        $this->app->enqueueMessage(
+                            Text::sprintf('WT SEO Meta templates - Tags not installed or updated',
+                                Text::_('Cannot install or update the data-provider plugin for Joomla Tags. PLease, <a href="' . $com_content_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
                             ), 'error'
                         );
 
@@ -245,89 +219,116 @@ return new class () implements ServiceProviderInterface {
                         $installed_message = true;
                     }
 
-                    $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - Virtuemart",
-                        "<strong>$virtuemart->author</strong> <strong>$virtuemart->name v.$virtuemart->version</strong> detected. <a href='$virtuemart->authorUrl' target='_blank'>$virtuemart->authorUrl</a> <a href='mailto:$virtuemart->authorEmail' target='_blank'>$virtuemart->authorEmail</a>", $installed_message);
-                }
+                    $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - Tags",
+                        "Plugin for Joomla Tags list and items list by tag.", $installed_message);
 
-                /**
-                 * JoomShopping
-                 */
+                    /**
+                     * Virtuemart
+                     */
 
-                if (file_exists(JPATH_ADMINISTRATOR . '/components/com_jshopping/jshopping.xml')) {
-                    $jshop = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_jshopping/jshopping.xml');
-                    // Install JoomShopping data-provider pkugin
-                    $jshop_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_joomshopping';
-                    if (!$this->installDependencies($adapter, $jshop_url)) {
-                        $this->app->enqueueMessage(
-                            Text::sprintf('WT SEO Meta templates - JoomShopping not installed or updated',
-                                Text::_('Cannot install or update the data-provider plugin for JoomShopping. PLease, <a href="' . $jshop_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
-                            ), 'error'
-                        );
-                        $installed_message = false;
-                    } else {
-                        $installed_message = true;
+                    if (file_exists(JPATH_ADMINISTRATOR . "/components/com_virtuemart/virtuemart.xml")) {
+
+
+                        $virtuemart = simplexml_load_file(JPATH_ADMINISTRATOR . "/components/com_virtuemart/virtuemart.xml");
+                        // Install Virtuemart data-provider plugin
+
+                        $virtuemart_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_virtuemart';
+                        if (!$this->installDependencies($adapter, $virtuemart_url)) {
+
+                            $this->app->enqueueMessage(
+                                Text::sprintf('WT SEO Meta templates - Virtuemart not installed or updated',
+                                    Text::_('Cannot install or update the data-provider plugin for Virtuemart. PLease, <a href="' . $virtuemart_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
+                                ), 'error'
+                            );
+
+                            $installed_message = false;
+                        } else {
+                            $installed_message = true;
+                        }
+
+                        $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - Virtuemart",
+                            "<strong>$virtuemart->author</strong> <strong>$virtuemart->name v.$virtuemart->version</strong> detected. <a href='$virtuemart->authorUrl' target='_blank'>$virtuemart->authorUrl</a> <a href='mailto:$virtuemart->authorEmail' target='_blank'>$virtuemart->authorEmail</a>", $installed_message);
                     }
 
-                    $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - JoomShopping",
-                        "<strong>$jshop->author</strong> <strong>$jshop->name v.$jshop->version</strong> detected. <a href='$jshop->authorUrl' target='_blank'>$jshop->authorUrl</a> <a href='mailto:$jshop->authorEmail' target='_blank'>$jshop->authorEmail</a>", $installed_message);
+                    /**
+                     * JoomShopping
+                     */
 
-                }
+                    if (file_exists(JPATH_ADMINISTRATOR . '/components/com_jshopping/jshopping.xml')) {
+                        $jshop = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_jshopping/jshopping.xml');
+                        // Install JoomShopping data-provider pkugin
+                        $jshop_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_joomshopping';
+                        if (!$this->installDependencies($adapter, $jshop_url)) {
+                            $this->app->enqueueMessage(
+                                Text::sprintf('WT SEO Meta templates - JoomShopping not installed or updated',
+                                    Text::_('Cannot install or update the data-provider plugin for JoomShopping. PLease, <a href="' . $jshop_url . '" class="btn btn-small btn-primary">download</a> it and install/update manually.')
+                                ), 'error'
+                            );
+                            $installed_message = false;
+                        } else {
+                            $installed_message = true;
+                        }
 
-                /**
-                 * Phoca Gallery
-                 */
+                        $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - JoomShopping",
+                            "<strong>$jshop->author</strong> <strong>$jshop->name v.$jshop->version</strong> detected. <a href='$jshop->authorUrl' target='_blank'>$jshop->authorUrl</a> <a href='mailto:$jshop->authorEmail' target='_blank'>$jshop->authorEmail</a>", $installed_message);
 
-                $com_phocagallery_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_phoca_gallery';
-                if (file_exists(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml')) {
-                    $phocagallery = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml');
-
-                    if (!$this->installDependencies($adapter, $com_phocagallery_url)) {
-                        $this->app->enqueueMessage(
-                            Text::sprintf('WT SEO Meta templates - Phoca Gallery not installed or updated',
-                                Text::_('Cannot install or update the data-provider plugin for Phoca Gallery. PLease, <a href="' . $com_phocagallery_url . '" class="btn btn-small btn-sm btn-primary">download</a> it and install/update manually.')
-                            ), 'error'
-                        );
-                        $installed_message = false;
-                    } else {
-                        $installed_message = true;
-                    }
-                    $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - Phoca Gallery",
-                        "<strong>$phocagallery->author</strong> <strong>$phocagallery->name v.$phocagallery->version</strong> detected. <a href='$phocagallery->authorUrl' target='_blank'>$phocagallery->authorUrl</a> <a href='mailto:$phocagallery->authorEmail' target='_blank'>$phocagallery->authorEmail</a>", $installed_message);
-                }
-
-
-                /**
-                 * My City Selector package
-                 */
-
-                if (file_exists(JPATH_SITE . "/administrator/manifests/packages/pkg_mycityselector.xml")) {
-
-                    $mcs = simplexml_load_file(JPATH_SITE . "/administrator/manifests/packages/pkg_mycityselector.xml");
-                    // Install My City Selector data-provider plugin
-                    $mcs_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_mcs';
-                    if (!$this->installDependencies($adapter, $mcs_url)) {
-                        $this->app->enqueueMessage(
-                            Text::sprintf('WT SEO Meta templates - My City Selector not installed or updated',
-                                Text::_('Cannot install or update the data-provider plugin for My City Selector. PLease, download it and install/update manually. ' . $mcs_url)
-                            ), 'error'
-                        );
-
-                        $installed_message = false;
-                    } else {
-                        $installed_message = true;
                     }
 
-                    $note = '';
-                    $mcs_min_version = '3.0.77';
-                    $mcs_version_compare = version_compare($mcs_min_version, $mcs->version, '<=');
-                    if ($mcs_version_compare !== true) {
-                        $note = "Note, You can only use the names of countries, provinces, and cities in one case in versions earlier <strong>" . $mcs_min_version . "</strong>";
+                    /**
+                     * Phoca Gallery
+                     */
+
+                    $com_phocagallery_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_phoca_gallery';
+                    if (file_exists(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml')) {
+                        $phocagallery = simplexml_load_file(JPATH_ADMINISTRATOR . '/components/com_phocagallery/phocagallery.xml');
+
+                        if (!$this->installDependencies($adapter, $com_phocagallery_url)) {
+                            $this->app->enqueueMessage(
+                                Text::sprintf('WT SEO Meta templates - Phoca Gallery not installed or updated',
+                                    Text::_('Cannot install or update the data-provider plugin for Phoca Gallery. PLease, <a href="' . $com_phocagallery_url . '" class="btn btn-small btn-sm btn-primary">download</a> it and install/update manually.')
+                                ), 'error'
+                            );
+                            $installed_message = false;
+                        } else {
+                            $installed_message = true;
+                        }
+                        $this->enqueueProvidersInstallationMessage("System - WT SEO Meta templates - Phoca Gallery",
+                            "<strong>$phocagallery->author</strong> <strong>$phocagallery->name v.$phocagallery->version</strong> detected. <a href='$phocagallery->authorUrl' target='_blank'>$phocagallery->authorUrl</a> <a href='mailto:$phocagallery->authorEmail' target='_blank'>$phocagallery->authorEmail</a>", $installed_message);
                     }
-                    $this->enqueueProvidersInstallationMessage('WT SEO Meta templates - My City Selector','Data-provider plugin for My City Selector. '.$note, $installed_message);
+
+
+                    /**
+                     * My City Selector package
+                     */
+
+                    if (file_exists(JPATH_SITE . "/administrator/manifests/packages/pkg_mycityselector.xml")) {
+
+                        $mcs = simplexml_load_file(JPATH_SITE . "/administrator/manifests/packages/pkg_mycityselector.xml");
+                        // Install My City Selector data-provider plugin
+                        $mcs_url = 'https://web-tolk.ru/get?element=wt_seo_meta_templates_mcs';
+                        if (!$this->installDependencies($adapter, $mcs_url)) {
+                            $this->app->enqueueMessage(
+                                Text::sprintf('WT SEO Meta templates - My City Selector not installed or updated',
+                                    Text::_('Cannot install or update the data-provider plugin for My City Selector. PLease, download it and install/update manually. ' . $mcs_url)
+                                ), 'error'
+                            );
+
+                            $installed_message = false;
+                        } else {
+                            $installed_message = true;
+                        }
+
+                        $note = '';
+                        $mcs_min_version = '3.0.77';
+                        $mcs_version_compare = version_compare($mcs_min_version, $mcs->version, '<=');
+                        if ($mcs_version_compare !== true) {
+                            $note = "Note, You can only use the names of countries, provinces, and cities in one case in versions earlier <strong>" . $mcs_min_version . "</strong>";
+                        }
+                        $this->enqueueProvidersInstallationMessage('WT SEO Meta templates - My City Selector', 'Data-provider plugin for My City Selector. ' . $note, $installed_message);
+                    }
+
+                    $html .= $this->prepareProvidersInstallationMessage();
                 }
-
-                $html .= $this->prepareProvidersInstallationMessage();
-
 
                 $html .= '</div>
 				<div class="col-12 col-md-4 p-0 d-flex flex-column justify-content-start">
@@ -342,6 +343,7 @@ return new class () implements ServiceProviderInterface {
 				</div>
 				';
                 $this->app->enqueueMessage($html, 'info');
+
                 return true;
             }
 
@@ -499,26 +501,25 @@ return new class () implements ServiceProviderInterface {
 
             private function prepareProvidersInstallationMessage(): string
             {
-                if(is_array($this->providersInstallationMessageQueue) && count($this->providersInstallationMessageQueue) > 0)
-                {
+                if (is_array($this->providersInstallationMessageQueue) && count($this->providersInstallationMessageQueue) > 0) {
                     $messages = [
                         "<div class=\"bg-light p-4\"><h4>Supported third-party extensions was found</h4>",
                         "<ul class=\"list-group list-group-flush\">"
                     ];
-                    foreach ($this->providersInstallationMessageQueue as $message){
+                    foreach ($this->providersInstallationMessageQueue as $message) {
 
 
                         $messages[] = "<li class=\"list-group-item d-flex justify-content-between align-items-center\">
-                                <div><h4>".$message['header']."</h4>
-                                <p>".$message['description']."</p>
+                                <div><h4>" . $message['header'] . "</h4>
+                                <p>" . $message['description'] . "</p>
                                 </div>
-                                ".(($message['install_result'] == true) ? "<span class=\"badge bg-success\">installed</span>" : "<span class=\"badge bg-danger\">not installed</span>")."                                
+                                " . (($message['install_result'] == true) ? "<span class=\"badge bg-success\">installed</span>" : "<span class=\"badge bg-danger\">not installed</span>") . "                                
                         </li>";
                     }
                     $messages[] = '</ul></div>';
 
                     $this->providersInstallationMessageQueue = [];
-                    return implode('',$messages);
+                    return implode('', $messages);
                 }
 
                 return '';
