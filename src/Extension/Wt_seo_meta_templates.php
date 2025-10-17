@@ -2,7 +2,7 @@
 
 /**
  * @package     WT SEO Meta templates
- * @version     2.0.3
+ * @version     2.0.4
  * @Author      Sergey Tolkachyov, https://web-tolk.ru
  * @copyright   Copyright (C) 2023 Sergey Tolkachyov
  * @license     GNU/GPL 3
@@ -11,14 +11,13 @@
 
 namespace Joomla\Plugin\System\Wt_seo_meta_templates\Extension;
 
-// No direct access
-defined('_JEXEC') or die;
-
 use Joomla\CMS\Event\AbstractEvent;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Profiler\Profiler;
 use Joomla\Event\SubscriberInterface;
 
+// No direct access
+\defined('_JEXEC') or die;
 final class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterface
 {
     protected $autoloadLanguage = true;
@@ -48,7 +47,14 @@ final class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterfa
             return;
         }
         !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: start');
+
         $doc = $app->getDocument();
+        // Работаем только в HTML
+        if (!($doc instanceof \Joomla\CMS\Document\HtmlDocument))
+        {
+            return;
+        }
+
         // получаем переменные от сторонних плагинов
         !JDEBUG ?: Profiler::getInstance('Application')->mark('<strong>plg WT SEO Meta templates</strong>: Before additional plugins import');
         $event = AbstractEvent::create('onWt_seo_meta_templatesAddVariables', [
@@ -114,8 +120,10 @@ final class Wt_seo_meta_templates extends CMSPlugin implements SubscriberInterfa
     /**
      * Show debug info for WT SEO Meta templates plugins
      * on frontend
+     *
+     * @param $event
+     *
      * @return void
-     * @throws \Exception
      * @since 2.0.0
      */
     public function onAfterRender($event): void
